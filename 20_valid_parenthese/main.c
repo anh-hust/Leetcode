@@ -16,33 +16,52 @@ bool is_match_close_parenthese(const char *the_open, const char *the_close) {
     }
 }
 
-// push & pop function will update: stack value, index and top of the stack
-void push(char *stack, int *stack_index, char *top) {
-    
+bool is_open_parenthese(const char *value) {
+    if (*value == '(' || *value == '{' || *value == '[') return true;
+    return false;
 }
 
-void pop(char *stack, int *stack_index, char *top) {
+// push & pop function will update: stack value, index and top of the stack
+// true mean the action be done succesfully
+bool push(char *stack, const int stack_max, int *const stack_index, char *top, const char *value) {
+    if (*stack_index == stack_max) return false;
+    stack[*stack_index] = *value;
+    *stack_index += 1;
+    top += 1;
+    return true;
+}
+
+bool pop(char *stack, int *const stack_index, char *top) {
+    if (top == stack) return false;
+    *stack_index -= 1;
+    top -= 1;
+    return true;
 }
 
 bool isValid(char *s) {
-    char *stack = (char *)malloc(strlen(s) * sizeof(char));
+    int input_len = strlen(s);
+    char *stack = (char *)malloc(input_len * sizeof(char));
     char *top = stack;
     bool ret = true;
 
     int i = 0;
     int stack_i = 0;
-    for (i; i < strlen(s); i++) {
-        if (s[i] == '(' || s[i] == '{' || s[i] == '[') {
-            stack[stack_i++] = s[i];
-            top = stack + stack_i;
+    int action_ret = false;
+    for (i; i < input_len; i++) {
+        if (is_open_parenthese(s[i])) {
+            action_ret = push(stack, input_len, &stack_i, top, s[i]);
         } else {
-            // assume the input string just have the open and close parenthese
+            // assume the input string just has the open and close parenthese
             if (is_match_close_parenthese(top, s[i]))
-                stack_i -= 1;
+                action_ret = pop(stack, &stack_i, top);
             else {
                 ret = false;
                 break;
             }
+        }
+        if (action_ret == false) {
+            ret = false;
+            break;
         }
     }
 
